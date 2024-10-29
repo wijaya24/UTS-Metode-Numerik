@@ -1,0 +1,200 @@
+# Reflan Guntia Wijaya_2309076040
+# UTS Metode Numerik
+
+# Tugas 1a
+import math
+
+def nilai_f(R):
+    L = 0.5  # Induktansi dalam satuan Henry
+    C = 10e-6  # Kapasitansi dalam satauan Farad (10 μF)
+    f = 1000  # Frekuensi dalam satuan Hertz
+
+    # Menghitung nilai f(R) dengan persamaan non linier
+    frekuensi = (1 / (2 * math.pi)) * math.sqrt((1 / (L * C)) - (R*2 / (4 * L*2)))
+    
+    return frekuensi
+
+print("[MENCARI FUNGSI f(R) PADA PERSAMAAN NON LINIER]")
+
+# Contoh penggunaan fungsi
+R = int(input("Masukan nilai resistor : "))  # Resistansi dalam satuan Ohm
+hasil = nilai_f(R)
+print(f"Nilai f(R) pada resistor = {R} Ohm adalah: {hasil:.4f} Hz")
+print("=============================================================")
+
+# Tugas 1 b
+import math
+
+L = 0.5  # Induktansi dalam satuan Henry
+C = 10e-6  # Kapasitansi dalam satuan Farad
+f_resonansi = 1000  # Frekuensi target dalam satuan Hz
+toleransi = 0.1  # Toleransi dalam satuan Ohm
+
+# Fungsi untuk menghitung frekuensi pada nilai R
+def menghitung_frekuensi(R):
+    return (1 / (2 * math.pi)) * math.sqrt(1 / (L * C) - (R*2 / (4 * L*2)))
+
+print("[METODE BISEKSI UNTUK MENGHITUNG NILAI RESISTANSI]")
+
+# Metode Biseksi
+def metode_biseksi(R_rendah, R_tinggi, f_resonansi, toleransi):
+    while (R_tinggi - R_rendah) / 2.0 > toleransi:
+        R_menengah = (R_rendah + R_tinggi) / 2.0
+        f_menengah = menghitung_frekuensi(R_menengah)
+
+        if f_menengah < f_resonansi:
+            R_rendah = R_menengah  # mencari interval atas
+        else:
+            R_tinggi = R_rendah  # mencari interval bawah
+
+    return (R_rendah + R_tinggi) / 2.0
+
+# Menentukan nilai interval awal
+R_rendah = 0
+R_tinggi = 100
+
+# Mencari nilai R
+R_hasil = metode_biseksi(R_rendah, R_tinggi, f_resonansi, toleransi)
+print(f"Nilai R untuk menghasilkan frekuensi resonansi {f_resonansi} Hz adalah: {R_hasil:.2f} Ω")
+print("=============================================================")
+
+# Tugas 1 c
+import math
+
+L = 0.5  # Induktansi dalam satuan Henry
+C = 10e-6  # Kapasitansi dalam satuan Farad
+f = 1000  # Frekuensi dalam satuan Hertz
+R0 = 50  # Tebakan awal dalam satuan Ohm
+toleransi = 0.1  # Toleransi dalam satuan Ohm
+
+def resonansi_frequensi(R):
+    return (1 / (2 * math.pi)) * math.sqrt(1 / (L * C) - (R*2 / (4 * L*2)))
+    
+print("[METODE NEWTON RAPHSON UNTUK MENGHITUNG NILAI RESISTANSI]")
+
+def metode_newton(R0, toleransi):
+    R = R0
+    iterasi = 0
+
+    while True:
+        try:
+            frequensi_current = resonansi_frequensi(R)
+            df_dR = (-R / (2 * L * math.sqrt(1 / (L * C) - (R*2 / (4 * L*2))))) * (1 / (2 * math.pi))
+
+            R_nilai = R - (frequensi_current - f) / df_dR
+            
+            if abs(R_nilai - R) < toleransi:
+                break
+            
+            R = R_nilai
+            iterasi += 1
+
+        except ZeroDivisionError:
+            print("Terjadi kesalahan: Pembagian dengan nol. Periksa nilai R.")
+            return None
+        except Exception as e:
+            print(f"Terjadi kesalahan: {e}")
+            return None
+
+    return R
+
+# Menjalankan fungsi untuk mencari nilai R
+R_hasil = metode_newton(R0, toleransi)
+
+if R_hasil is not None:
+    print(f"Nilai R yang ditemukan: {R_hasil:.4f} Ω")
+else:
+    print("Gagal menemukan nilai R.")
+print("=============================================================")
+
+# Tugas 1d
+import math
+import matplotlib.pyplot as plt
+
+print("[HASIL DAN KECEPATAN KONVERGENSI]")
+
+L = 0.5  # Induktansi dalam satuan Henry
+C = 10e-6  # Kapasitansi dalam satuan Farad
+f_resonansi = 1000  # Frekuensi target dalam satuan Hz
+toleransi = 0.1  # Toleransi dalam satuan Ohm
+
+# Fungsi untuk menghitung frekuensi pada nilai R
+def menghitung_frekuensi(R):
+    return (1 / (2 * math.pi)) * math.sqrt(1 / (L * C) - (R*2 / (4 * L*2)))
+
+# Metode Biseksi
+def metode_biseksinya(R_rendah, R_tinggi, f_resonansi, toleransi):
+    iterasi = 0
+    while (R_tinggi - R_rendah) / 2.0 > toleransi:
+        R_menengah = (R_rendah + R_tinggi) / 2.0
+        f_menengah = menghitung_frekuensi(R_menengah)
+
+        if f_menengah < f_resonansi:
+            R_rendah = R_menengah  # mencari interval atas
+        else:
+            R_tinggi = R_menengah  # mencari interval bawah
+            
+        iterasi += 1
+
+    return (R_rendah + R_tinggi) / 2.0, iterasi
+
+# Metode Newton-Raphson
+def metode_newton(R0, toleransi):
+    R = R0
+    iterasi = 0
+    while True:
+        frequensi_current = menghitung_frekuensi(R)
+
+        # Cek untuk mencegah pembagian dengan nol
+        try:
+            df_dR = (-R / (2 * L * math.sqrt(1 / (L * C) - (R*2 / (4 * L*2))))) * (1 / (2 * math.pi))
+            R_nilai = R - (frequensi_current - f_resonansi) / df_dR
+            
+            if abs(R_nilai - R) < toleransi:
+                break
+
+            R = R_nilai
+            iterasi += 1
+
+        except ZeroDivisionError:
+            print("Terjadi kesalahan: Pembagian dengan nol. Periksa nilai R.")
+            return None, iterasi
+
+    return R, iterasi
+
+# Menghitung nilai R dengan kedua metode
+R_rendah = 0
+R_tinggi = 100
+R_bisection, iterasi_bisection = metode_biseksinya(R_rendah, R_tinggi, f_resonansi, toleransi)
+R_newton, iterasi_newton = metode_newton(50, toleransi)
+
+# Menampilkan hasil
+print(f"Nilai R dengan metode bisection: {R_bisection:.2f} Ω, Iterasi: {iterasi_bisection}")
+print(f"Nilai R dengan metode Newton-Raphson: {R_newton:.2f} Ω, Iterasi: {iterasi_newton}")
+
+# Visualisasi
+labels = ['Bisection', 'Newton-Raphson']
+iterations = [iterasi_bisection, iterasi_newton]
+values = [R_bisection, R_newton]
+
+x = range(len(labels))
+
+fig, ax1 = plt.subplots()
+
+color = 'tab:blue'
+ax1.set_xlabel('Metode')
+ax1.set_ylabel('Nilai R (Ω)', color=color)
+ax1.bar(x, values, color=color, alpha=0.6, label='Nilai R')
+ax1.tick_params(axis='y', labelcolor=color)
+
+ax2 = ax1.twinx()  
+color = 'tab:red'
+ax2.set_ylabel('Iterasi', color=color)
+ax2.plot(x, iterations, color=color, marker='o', label='Iterasi')
+ax2.tick_params(axis='y', labelcolor=color)
+
+fig.tight_layout()
+plt.xticks(x, labels)
+plt.title('Perbandingan Metode Bisection dan Newton-Raphson')
+plt.show()
+print("=============================================================")
